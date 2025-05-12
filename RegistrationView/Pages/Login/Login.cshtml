@@ -14,12 +14,12 @@
         <input asp-for="Input.EmailAddress" class="form-control" />
         <span asp-validation-for="Input.EmailAddress" class="text-danger"></span>
     </div>
-
+@* 
     <div class="form-group">
         <label asp-for="Input.Fullname" class="control-label"></label>
         <input asp-for="Input.Fullname" class="form-control" />
         <span asp-validation-for="Input.Fullname" class="text-danger"></span>
-    </div>
+    </div> *@
 
     <div class="form-group">
         <label asp-for="Input.Passwords" class="control-label"></label>
@@ -32,4 +32,35 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '@TempData["SuccessMessage"]',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            </text>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '@TempData["ErrorMessage"]',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            </text>
+        }
+    </script>
 }

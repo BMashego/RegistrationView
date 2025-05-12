@@ -34,9 +34,9 @@ namespace RegistrationView.Pages
 
             [Required]
             [DataType(DataType.Password)]
-            [StringLength(100, MinimumLength = 4,
-                ErrorMessage = "Password must be at least 4 characters long.")]
-            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{4,}$",
+            [StringLength(100, MinimumLength = 12,
+                ErrorMessage = "Password must be at least 12 characters long.")]
+            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$",
                 ErrorMessage = "Password must contain at least one uppercase, one lowercase, one number, and one special character.")]
             public string Passwords { get; set; }
         }
@@ -68,7 +68,7 @@ namespace RegistrationView.Pages
             }
             catch
             {
-                ModelState.AddModelError(string.Empty, "Error while registering user. Please try again.");
+                TempData["ErrorMessage"] = "Registration failed. Email already exists.";
                 return Page();
             }
         }

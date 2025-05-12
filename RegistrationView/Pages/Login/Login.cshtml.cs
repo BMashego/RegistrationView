@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using RegistrationView.Models;
 using RegistrationView.Services;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using static RegistrationView.Pages.RegisterModel;
 
 namespace RegistrationView.Pages.Login
 {
@@ -21,7 +23,17 @@ namespace RegistrationView.Pages.Login
         }
 
         [BindProperty]
-        public UserModel Input { get; set; }
+        public InputModel Input { get; set; }
+        public class InputModel
+        {
+            [Required]
+            [EmailAddress]
+            public string EmailAddress { get; set; }
+
+            [Required]
+            [DataType(DataType.Password)]
+            public string Passwords { get; set; }
+        }
 
         public void OnGet()
         {
@@ -69,8 +81,9 @@ namespace RegistrationView.Pages.Login
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
                 });
 
-            //TempData["ID"] = user.ID;
-
+            //Redirect To Welcome Page
+            TempData["SuccessMessage"] = "Successful Login!";
+            TempData["SuccessMessage"] = $"Welcome back, {user.Fullname}!";
             return RedirectToPage("/Welcome/Welcome");
         }
     }

@@ -14,21 +14,19 @@
 }
 
 <form method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-    <div class="form-group mb-3">
+    <div class="mb-3">
         <label asp-for="User.Fullname" class="form-label"></label>
         <input asp-for="User.Fullname" class="form-control" />
         <span asp-validation-for="User.Fullname" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <div class="mb-3">
         <label asp-for="User.EmailAddress" class="form-label"></label>
         <input asp-for="User.EmailAddress" class="form-control" />
         <span asp-validation-for="User.EmailAddress" class="text-danger"></span>
     </div>
 
-    <div class="form-group mb-3">
+    <div class="mb-3">
         <label asp-for="User.Passwords" class="form-label"></label>
         <input asp-for="User.Passwords" class="form-control" type="password" />
         <span asp-validation-for="User.Passwords" class="text-danger"></span>
@@ -39,4 +37,37 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: '@TempData["SuccessMessage"]',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            </text>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: '@TempData["ErrorMessage"]',
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false
+                });
+            </text>
+        }
+    </script>
 }
