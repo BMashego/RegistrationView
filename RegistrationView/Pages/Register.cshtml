@@ -1,0 +1,42 @@
+﻿@page
+@model RegistrationView.Pages.RegisterModel
+@{
+    ViewData["Title"] = "User Registration";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="User.Fullname" class="form-label"></label>
+        <input asp-for="User.Fullname" class="form-control" />
+        <span asp-validation-for="User.Fullname" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="User.EmailAddress" class="form-label"></label>
+        <input asp-for="User.EmailAddress" class="form-control" />
+        <span asp-validation-for="User.EmailAddress" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="User.Passwords" class="form-label"></label>
+        <input asp-for="User.Passwords" class="form-control" type="password" />
+        <span asp-validation-for="User.Passwords" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

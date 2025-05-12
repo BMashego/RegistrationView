@@ -1,0 +1,10 @@
+﻿@page
+@model WelcomeModelModel
+@{
+    ViewData["Title"] = "Welcome";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Welcome, @Model.Fullname!</p>
+<a href="/Logout">Logout</a>
