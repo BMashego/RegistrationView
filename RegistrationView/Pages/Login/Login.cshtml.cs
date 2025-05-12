@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
@@ -7,7 +8,6 @@ using RegistrationView.Models;
 using RegistrationView.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using static RegistrationView.Pages.RegisterModel;
 
 namespace RegistrationView.Pages.Login
 {
@@ -15,11 +15,13 @@ namespace RegistrationView.Pages.Login
     {
         private readonly StoredProcedureService _storedProcedureService;
         private readonly IAuthenticationService _authenticationService;
+        private readonly IPasswordHasher<UserModel> _passwordHasher;
 
-        public LoginModel(StoredProcedureService storedProcedureService, IAuthenticationService authenticationService)
+        public LoginModel(StoredProcedureService storedProcedureService, IAuthenticationService authenticationService, IPasswordHasher<UserModel> passwordHasher)
         {
             _storedProcedureService = storedProcedureService;
             _authenticationService = authenticationService;
+            _passwordHasher = passwordHasher;
         }
 
         [BindProperty]
@@ -47,8 +49,7 @@ namespace RegistrationView.Pages.Login
             var parameters = new[]
             {
                 new SqlParameter("@EmailAddress", Input.EmailAddress),
-                new SqlParameter("@Passwords", Input.Passwords),
-                new SqlParameter("@Action", "LOGIN")
+                new SqlParameter("@Action", "CHECK_EMAIL")
             };
 
             // Fetch user data from SP
@@ -60,29 +61,29 @@ namespace RegistrationView.Pages.Login
                 return Page();
             }
 
-            // Create claims for the logged-in user
-            var claims = new List<Claim>
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Passwords, Input.Passwords);
+
+            if (result != PasswordVerificationResult.Success)
             {
-                new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
-                new Claim(ClaimTypes.Name, user.Fullname),
-                new Claim(ClaimTypes.Email, user.EmailAddress)
-            };
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");
+                return Page();
+            }
+
+            // Success - create auth cookie, etc.
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
+            new Claim(ClaimTypes.Name, user.Fullname),
+            new Claim(ClaimTypes.Email, user.EmailAddress)
+        };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            await _authenticationService.SignInAsync(
-                HttpContext,
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                principal,
-                new AuthenticationProperties
-                {
-                    IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
-                });
+            await _authenticationService.SignInAsync(HttpContext, CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties { IsPersistent = true });
 
-            //Redirect To Welcome Page
-            TempData["SuccessMessage"] = "Successful Login!";
+
+            // Set success message and redirect to the Welcome page
             TempData["SuccessMessage"] = $"Welcome back, {user.Fullname}!";
             return RedirectToPage("/Welcome/Welcome");
         }

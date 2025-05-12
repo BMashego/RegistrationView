@@ -1,0 +1,25 @@
+﻿@page
+@model RegistrationView.Pages.ResetRequest.ResetRequestModel
+@{
+    ViewData["Title"] = "Password Reset Request";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Please enter your email address to receive a password reset link.</p>
+
+<form method="post">
+    <div class="form-group">
+        <label for="EmailAddress">Email Address</label>
+        <input type="email" class="form-control" id="EmailAddress" name="EmailAddress" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Request Reset Link</button>
+</form>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-info mt-3">
+        @TempData["Message"]
+    </div>
+}

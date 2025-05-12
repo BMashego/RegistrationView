@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
@@ -13,10 +14,12 @@ namespace RegistrationView.Pages
     public class RegisterModel : PageModel
     {
         private readonly StoredProcedureService _storedProcedureService;
+        private readonly IPasswordHasher<UserModel> _passwordHasher;
 
-        public RegisterModel(StoredProcedureService storedProcedureService)
+        public RegisterModel(StoredProcedureService storedProcedureService, IPasswordHasher<UserModel> passwordHasher)
         {
             _storedProcedureService = storedProcedureService;
+            _passwordHasher = passwordHasher;
         }
 
         [BindProperty]
@@ -46,38 +49,29 @@ namespace RegistrationView.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-                return Page();
+            if (!ModelState.IsValid) return Page();
 
-            // Hash password (you can use a better method in real apps)
-            var hashedPassword = HashPassword(User.Passwords);
+            var user = new UserModel
+            {
+                Fullname = User.Fullname,
+                EmailAddress = User.EmailAddress
+            };
+
+            // Hash password
+            user.Passwords = _passwordHasher.HashPassword(user, User.Passwords);
 
             var parameters = new[]
             {
-                new SqlParameter("@Fullname", User.Fullname),
-                new SqlParameter("@EmailAddress", User.EmailAddress),
-                new SqlParameter("@Passwords", hashedPassword),
-                new SqlParameter("@Action", "ADD")
-            };
+            new SqlParameter("@Fullname", user.Fullname),
+            new SqlParameter("@EmailAddress", user.EmailAddress),
+            new SqlParameter("@Passwords", user.Passwords),
+            new SqlParameter("@Action", "ADD")
+        };
 
-            try
-            {
-                await _storedProcedureService.ExecuteStoredProcedureAsync("sp_UserTable", parameters);
-                TempData["SuccessMessage"] = "Registration successful!";
-                return RedirectToPage("/Login/Login");
-            }
-            catch
-            {
-                TempData["ErrorMessage"] = "Registration failed. Email already exists.";
-                return Page();
-            }
-        }
+            await _storedProcedureService.ExecuteStoredProcedureAsync("sp_UserTable", parameters);
 
-        private string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
+            TempData["SuccessMessage"] = "Registration successful!";
+            return RedirectToPage("/Login/Login");
         }
     }
     
